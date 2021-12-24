@@ -1,52 +1,46 @@
 package service;
 
+import lombok.experimental.SuperBuilder;
+import model.CharArrayModel;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 
+@SuperBuilder
 public class CharCombinationService {
-    final char[] charArray;
-    final WritingChars writer;
-    int lengthOfSequence = 0;
-    int iterationCount = 0;
+    private final CharArrayModel charArrayModel;
 
-    public CharCombinationService(String pathToRead, String pathToWrite) throws FileNotFoundException {
-        char[] chars = ReadindChars.readChars(pathToRead);
-        assert chars != null;
-        Arrays.sort(chars);
-        this.charArray = chars;
-        this.writer = new WritingChars(pathToWrite);
+    public CharCombinationService(CharArrayModel charArrayModel) {
+        this.charArrayModel = charArrayModel;
     }
 
     public void createAllDifferentSequences(int lengthOfSequence) throws IOException {
-        this.lengthOfSequence = lengthOfSequence;
+        charArrayModel.setLengthOfSequence(lengthOfSequence);
         StringBuilder str = new StringBuilder();
-        for (int i = 0; i<lengthOfSequence; i++){
-            str.append(0);
-        }
-        writer.write( "");
-        setCharInSequence2(str,0);
+        str.append("0".repeat(Math.max(0, lengthOfSequence)));
+        setCharInSequence(str,0, charArrayModel);
     }
 
-    public void setCharInSequence2(StringBuilder str, int numberOfChar) throws IOException {
-        for (int i = 0; i < charArray.length; i++) {
-            str.setCharAt(numberOfChar,charArray[i]);
-            if (numberOfChar < lengthOfSequence-1){
-                setCharInSequence2(str,numberOfChar+1);
+    public void setCharInSequence(StringBuilder str, int numberOfChar, CharArrayModel charArrayModel) throws IOException {
+        for (int i = 0; i < charArrayModel.getCharArray().length; i++) {
+            str.setCharAt(numberOfChar,charArrayModel.getCharArray()[i]);
+            if (numberOfChar < charArrayModel.getLengthOfSequence()-1){
+                setCharInSequence(str,numberOfChar+1, charArrayModel);
             }else{
-                iterationCount++;
-                writer.write(str + "");
-                if (iterationCount%Math.pow(charArray.length,2) == 0){
-                    writer.write("\n");
-                }
-                if (iterationCount == (int) Math.pow(charArray.length,lengthOfSequence-1)){
-                    writer.write("\n");
-                    iterationCount = 0;
-                }
+                charArrayModel.getWriter().write(str + "");
+                charArrayModel.iterationCount++;
+                addingSpace(charArrayModel);
             }
         }
     }
 
+    private void addingSpace(CharArrayModel charArrayModel) throws IOException {
+        if (charArrayModel.iterationCount%Math.pow(charArrayModel.getCharArray().length,2) == 0){
+            charArrayModel.getWriter().write("\n");
+        }
+        if (charArrayModel.iterationCount == (int) Math.pow(charArrayModel.getCharArray().length,charArrayModel.getLengthOfSequence()-1)){
+            charArrayModel.getWriter().write("\n");
+            charArrayModel.iterationCount = 0;
+        }
+    }
 }
 
